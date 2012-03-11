@@ -12,7 +12,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -34,6 +33,7 @@ public class AddressBook {
 	private String path = null;
 	private boolean modify;
 
+
 	public AddressBook() {
 		super();
 		personInfos = new ArrayList<PersonInfo>();
@@ -44,6 +44,7 @@ public class AddressBook {
 	public List<PersonInfo> getPersonInfos() {
 		return personInfos;
 	}
+	
 
 	public void setPersonInfos(List<PersonInfo> personInfos) {
 		this.personInfos = personInfos;
@@ -61,31 +62,32 @@ public class AddressBook {
 		return logger;
 	}
 
-	public void add() {
+	public boolean add() throws IOException {
 		PersonInfo personInfo = new PersonInfo();
-		System.out.println("Please enter name: ");
-		personInfo.setName(doIO());
-		System.out.println("Please enter phone number: ");
-		personInfo.setPhone(doIO());
-		System.out.println("Please enter address: ");
-		personInfo.setAddress(doIO());
-		personInfos.add(personInfo);
+		System.out.println("Please enter in this fomat: name;phone;address");
+		String str = doIO();
+		 String[] content = str.split(";");
+		 if(content.length == 3) {
+			 personInfo.setName(content[0]);
+			 personInfo.setPhone(content[1]);
+			 personInfo.setAddress(content[2]);
+			personInfos.add(personInfo);
+			return true;
+		 } else {
+			 System.out.println("Please enter information in the right format!");
+			 return false;
+		 }
 	}
 
-	public String doIO() {
+	public String doIO() throws IOException {
 		String str;
-		try {
 			BufferedReader input = new BufferedReader(new InputStreamReader(
 					System.in));
 			str = input.readLine();
-		} catch (IOException e) {
-			System.out.println("Please insert the information!");
-			str = doIO();
-		}
 		return str;
 	}
 
-	public List<PersonInfo> compFind() {
+	public List<PersonInfo> compFind() throws IOException {
 		ArrayList<PersonInfo> resultList = null;
 		System.out.println("Please enter the phone number: ");
 		String phone = doIO();
@@ -100,7 +102,7 @@ public class AddressBook {
 		return resultList;
 	}
 
-	public List<PersonInfo> partFind() {
+	public List<PersonInfo> partFind() throws IOException {
 		ArrayList<PersonInfo> resultList = null;
 		System.out.println("Please enter the phone number: ");
 		String phone = doIO();
@@ -127,10 +129,9 @@ public class AddressBook {
 		}
 	}
 
-	public boolean save() {
+	public boolean save() throws IOException,TransformerFactoryConfigurationError, TransformerException, ParserConfigurationException {
 		logger.info("entering save...");
 		File file = new File(path);
-		try {
 			if (file.exists() && modify == false) {
 				System.out
 						.println("File exists! Do you want to recover the file ?");
@@ -141,13 +142,7 @@ public class AddressBook {
 			} else {
 				file.createNewFile();
 			}
-		} catch (IOException e) {
-			logger.error(e.toString());
-			//e.printStackTrace();
-			//return false;
-		}
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		try {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document document = builder.newDocument();
 
@@ -170,27 +165,10 @@ public class AddressBook {
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			DOMSource source = new DOMSource(document);
 			transformer.transform(source, result);
-		} catch (ParserConfigurationException e) {
-			logger.error(e.toString());
-			//e.printStackTrace();
-			//return false;
-		} catch (TransformerConfigurationException e) {
-			logger.error(e.toString());
-			//e.printStackTrace();
-			//return false;
-		} catch (TransformerFactoryConfigurationError e) {
-			logger.error(e.toString());
-			//e.printStackTrace();
-			//return false;
-		} catch (TransformerException e) {
-			logger.error(e.toString());
-			//e.printStackTrace();
-			//return false;
-		}
 		return true;
 	}
 
-	public boolean load() {
+	public boolean load() throws SAXException, IOException, ParserConfigurationException {
 		logger.info("entering load...");
 		File file = new File(path);
 		if (!file.exists()) {
@@ -198,7 +176,6 @@ public class AddressBook {
 			return false;
 		} else {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			try {
 				DocumentBuilder builder;
 					builder = factory.newDocumentBuilder();
 					Document document = builder.parse(file);
@@ -216,21 +193,36 @@ public class AddressBook {
 					personInfo.setAddress(XMLaddress.getTextContent());
 					personInfos.add(personInfo);
 				}
-			} catch (IOException e) {
-				logger.error(e.toString());
-				//e.printStackTrace();
-				//return false;
-			} catch (ParserConfigurationException e) {
-				logger.error(e.toString());
-				//e.printStackTrace();
-				//return false;
-			} catch (SAXException e) {
-				logger.error(e.toString());
-				//e.printStackTrace();
-				//return false;
-			}
 		}
 		return true;
+	}
+	
+	public void sendMessage(String order) throws IOException, ParserConfigurationException, SAXException, TransformerFactoryConfigurationError, TransformerException {
+		logger.info("Send Message: {}", order);
+		if (order.equals("add")) {
+			add();
+		} else if (order.equals("show")) {
+			show(getPersonInfos());
+		} else if (order.equals("find -comp")) {
+			List<PersonInfo> personList = compFind();
+			show(personList);
+		} else if (order.equals("find -part")) {
+			List<PersonInfo> personList = partFind();
+			show(personList);
+		} else if (order.equals("save")) {
+			while (getPath().equals("")) {
+				System.out.println("Please enter the path: ");
+				setPath(doIO() + ".addr");
+			}
+			save();
+		} else if (order.equals("load")) {
+			System.out.println("Please enter the path: ");
+			setPath(doIO() + ".addr");
+			load();
+		} else {
+			System.out.println("Please enter the right order!");
+		}
+		
 	}
 
 }
