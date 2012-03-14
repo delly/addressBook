@@ -32,7 +32,7 @@ public class Console implements Runnable {
      */
     public void doAdd() throws IOException {
         System.out.println("Please enter in this fomat: name;phone;address");
-        String str = addressBook.doIO();
+        String str = addressBook.doIO(System.in);
         if (addressBook.add(str) == false)
             System.out.println("Please enter information in the right format!");
     }
@@ -44,7 +44,7 @@ public class Console implements Runnable {
      */
     public void doCompFind() throws IOException {
         System.out.println("Please enter the phone number: ");
-        String phone = addressBook.doIO();
+        String phone = addressBook.doIO(System.in);
         System.out.print(addressBook.show(addressBook.compFind(phone)));
     }
 
@@ -55,7 +55,7 @@ public class Console implements Runnable {
      */
     public void doPartFind() throws IOException {
         System.out.println("Please enter the phone number: ");
-        String phone = addressBook.doIO();
+        String phone = addressBook.doIO(System.in);
         System.out.print(addressBook.show(addressBook.partFind(phone)));
     }
 
@@ -66,7 +66,7 @@ public class Console implements Runnable {
      */
     public void doLoad() throws IOException {
         System.out.println("Please enter the path: ");
-        addressBook.setPath(addressBook.doIO() + ".addr");
+        addressBook.setPath(addressBook.doIO(System.in) + ".addr");
         try {
             if (!addressBook.load()) {
                 System.out.println("addr file not exit!");
@@ -93,11 +93,11 @@ public class Console implements Runnable {
     public void doSave() throws IOException {
         if (addressBook.getPath().equals("")) {
             System.out.println("Please enter the path: ");
-            addressBook.setPath(addressBook.doIO() + ".addr");
+            addressBook.setPath(addressBook.doIO(System.in) + ".addr");
         }
         if (addressBook.fileExists()) {
             System.out.println("File exists! Do you want to recover the file ? (y/n)");
-            String order = addressBook.doIO();
+            String order = addressBook.doIO(System.in);
             if (order.equals("y")) {
                 try {
                     addressBook.save(false);
@@ -151,11 +151,11 @@ public class Console implements Runnable {
     public void run() {
         System.out.println("~Welcome to BIGCOW address Book~");
         try {
-            String order = addressBook.doIO();
+            String order = addressBook.doIO(System.in);
             while (!order.equals("quit")) {
                 sendMessage(order);
                 System.out.println("~Welcome to BIGCOW address Book~");
-                order = addressBook.doIO();
+                order = addressBook.doIO(System.in);
             }
         } catch (IOException e) {
             logger.error("io error at run", e);

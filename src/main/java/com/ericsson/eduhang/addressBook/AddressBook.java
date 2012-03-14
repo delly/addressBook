@@ -1,5 +1,6 @@
 package com.ericsson.eduhang.addressBook;
 
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,7 +33,7 @@ import org.xml.sax.SAXException;
  * 
  */
 public class AddressBook {
-    private static final Logger logger = LoggerFactory.getLogger(AddressBook.class);
+    private static final Logger logger = LoggerFactory.getLogger(AddressBook.class);;
 
     private List<PersonInfo> personInfos;
     private String path;
@@ -92,10 +93,10 @@ public class AddressBook {
      * @return str String,the input of the customer
      * @throws IOException
      */
-    public String doIO() throws IOException {
+    public String doIO(InputStream inputStream) throws IOException {
         logger.info("entering doIO...");
         String str;
-        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        BufferedReader input = new BufferedReader(new InputStreamReader(inputStream));
         str = input.readLine();
         logger.debug(str);
         logger.info("leaving doIO...");
@@ -105,7 +106,7 @@ public class AddressBook {
     /**
      * 
      * @param input
-     *            String,the information to add,format like "name;phone;address"
+     *        String,the information to add,format like "name;phone;address"
      * @return addSuccess Boolean,whether the add performance is suecess or not
      * @throws IOException
      */

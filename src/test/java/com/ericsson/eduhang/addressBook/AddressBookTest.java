@@ -6,6 +6,7 @@ package com.ericsson.eduhang.addressBook;
 
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,11 +17,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.api.Action;
-import org.jmock.integration.junit4.JUnit4Mockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,15 +30,6 @@ public class AddressBookTest {
     List<PersonInfo> personInfos = null;
     AddressBook addrBook = null;
 
-    protected final Mockery context = new JUnit4Mockery() {
-        {
-            setImposteriser(ClassImposteriser.INSTANCE);
-        }
-    };
-
-    public Action ChangeBytes(final byte[] result) {
-        return new ChangeBytesActionTest(result);
-    }
 
     /**
      * @throws java.lang.Exception
@@ -93,24 +80,9 @@ public class AddressBookTest {
     @Test
     public void testDoIO() throws IOException {
 
-        final InputStream origin = System.in;
-        final InputStream mockStream = context.mock(InputStream.class);
-        System.setIn(mockStream);
-        context.checking(new Expectations() {
-            {
-                final byte[] b = new byte[8192];
-                oneOf(mockStream).read(b, 0, 8192);
-
-                final byte[] result = new byte[8192];
-                result[0] = 'y';
-                result[1] = '\n';
-                will(ChangeBytes(result));
-            }
-        });
         String strResult = "y";
-
-        assertEquals(addrBook.doIO(), strResult);
-        System.setIn(origin);
+        InputStream input = new ByteArrayInputStream(strResult.getBytes());
+        assertEquals(addrBook.doIO(input), strResult);
     }
 
     @Test
